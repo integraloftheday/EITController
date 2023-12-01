@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Current Source Programmer</title>
+
+    <!-- Include Bootstrap CSS -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Include Plotly library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <style>
+        .terminal {
+            background-color: #2b2b2b;
+            color: #dcdccc;
+            padding: 10px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            max-height: 200px; /* Adjust as needed */
+
+        /* ... (existing styling) ... */
+        overflow-y: auto;
+        max-height: 200px;
+        position: relative;
+    }
+
+    .cursor {
+        display: inline-block;
+        width: 10px;
+        height: 16px;
+        background-color: #dcdccc;
+        animation: blink 1s infinite step-start;
+    }
+
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
+    </style>
+</head>
+<body>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Title Element -->
+            <h2>Current Source Programmer</h2>
+
+            <!-- Frequency Textbox -->
+            <div class="form-group">
+                <label for="frequency">Frequency (Hz)</label>
+                <input type="text" class="form-control" id="frequency" placeholder="Enter frequency ">
+            </div>
+
+            <!-- First Dropdown Menu and Text Fields -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="polarity1">Polarity</label>
+                    <select id="polarity1" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>Positive</option>
+                        <option>Negative</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="delayStart1">Delay Start (ms)</label>
+                    <input type="text" class="form-control" id="delayStart1" placeholder="Enter delay start">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currentDuration1">Current Duration (ms)</label>
+                    <input type="text" class="form-control" id="currentDuration1" placeholder="Enter current duration">
+                </div>
+            </div>
+
+            <!-- Duplicate Dropdown Menu and Text Fields -->
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="polarity2">Polarity</label>
+                    <select id="polarity2" class="form-control">
+                        <option selected>Choose...</option>
+                        <option>Positive</option>
+                        <option>Negative</option>
+                    </select>
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="delayStart2">Delay Start (ms)</label>
+                    <input type="text" class="form-control" id="delayStart2" placeholder="Enter delay start">
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="currentDuration2">Current Duration (ms)</label>
+                    <input type="text" class="form-control" id="currentDuration2" placeholder="Enter current duration">
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <!-- Add this button inside the <div class="col-md-8"> element -->
+            <button type="button" class="btn btn-warning" onclick="connectToArduino()">Connect to Arduino</button>
+            <button type="button" class="btn btn-primary" onclick="analyze()">Analyze</button>
+            <button type="button" class="btn btn-success" onclick="analyzeArduino()">Program</button>
+            
+            <h2>Serial Communications</h2>
+            <div id="receivedData" class="terminal"><!-- Add the cursor class to the receivedData div -->
+                <div id="receivedData" class="terminal cursor"></div>
+                </div>
+            <!-- Scatter Plot Container -->
+            <div id="scatterPlot"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Bootstrap JS and Popper.js -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<script src="index.js"></script>
+</body>
+</html>
