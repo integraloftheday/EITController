@@ -134,6 +134,12 @@ float duration1;
 bool positive2;
 float delayStart2;
 float duration2;
+bool positive3;
+float delayStart3;
+float duration3;
+bool positive4;
+float delayStart4;
+float duration4;
 
 void loop() {
 // serial communication 
@@ -143,9 +149,10 @@ if (Serial.available() > 0) {
     String serialMessage = Serial.readStringUntil('\n');
 
     // Parse the serial message
-    int parsedItems = sscanf(serialMessage.c_str(), "%d-%d-%f-%f-%d-%f-%f", 
+    int parsedItems = sscanf(serialMessage.c_str(), "%d-%d-%f-%f-%d-%f-%f-%d-%f-%f-%d-%f-%f", 
                              &frequency, &positive1, &delayStart1, &duration1,
-                             &positive2, &delayStart2, &duration2);
+                             &positive2, &delayStart2, &duration2,&positive3, &delayStart3, &duration3,
+                             &positive4, &delayStart4, &duration4);
 
     // Check if all values were parsed successfully
     if (parsedItems == 7) {
@@ -182,8 +189,9 @@ if (Serial.available() > 0) {
   }
 
 
-syncConsoleCurrent_value = syncConsolePrev_value;
-syncConsolePrev_value = digitalRead(syncConsole_pin);
+//correct layout of the calls
+syncConsoleCurrent_value = digitalRead(syncConsole_pin);
+syncConsolePrev_value = syncConsoleCurrent_value;
 
 
 
@@ -237,7 +245,7 @@ if((syncConsoleCurrent_value == HIGH) && (syncConsolePrev_value == LOW)){
 
  else if(pos_neg == 1){
   if(!positive2){
-    delayMicroseconds(delayStart1);
+    delayMicroseconds(delayStart2);
     digitalWrite(switch1_pin,LOW);
     digitalWrite(howland_pin,HIGH); // H
     digitalWrite(switch2_pin,LOW);  // A
@@ -272,41 +280,88 @@ if((syncConsoleCurrent_value == HIGH) && (syncConsolePrev_value == LOW)){
     digitalWrite(switch2_pin,HIGH);  // A
   }
 
+    pos_neg = 2;
+  }
+
+   else if(pos_neg == 2){
+  if(!positive3){
+    delayMicroseconds(delayStart3);
+    digitalWrite(switch1_pin,LOW);
+    digitalWrite(howland_pin,HIGH); // H
+    digitalWrite(switch2_pin,LOW);  // A
+    
+    send16bits(control_data_LSB);
+    send16bits(lowRegister);
+    send16bits(control_data_MSB);
+    send16bits(highRegister);
+    send16bits(Phase);
+   
+    delayMicroseconds(duration3); 
+    send16bits(sleepy);  
+    
+    digitalWrite(howland_pin,LOW); // H
+    digitalWrite(switch2_pin,HIGH);  // A
+  }else{
+    delayMicroseconds(delayStart3);
+    digitalWrite(switch1_pin,HIGH);
+    digitalWrite(howland_pin,HIGH); // H
+    digitalWrite(switch2_pin,LOW);  // A
+
+      send16bits(control_data_LSB);
+      send16bits(lowRegister);
+      send16bits(control_data_MSB);
+      send16bits(highRegister);
+      send16bits(Phase);
+  
+    delayMicroseconds(duration3);
+    send16bits(sleepy);     
+
+    digitalWrite(howland_pin,LOW); // H
+    digitalWrite(switch2_pin,HIGH);  // A
+  }
+
+    pos_neg = 3;
+  }
+
+   else if(pos_neg == 3){
+  if(!positive2){
+    delayMicroseconds(delayStart4);
+    digitalWrite(switch1_pin,LOW);
+    digitalWrite(howland_pin,HIGH); // H
+    digitalWrite(switch2_pin,LOW);  // A
+    
+    send16bits(control_data_LSB);
+    send16bits(lowRegister);
+    send16bits(control_data_MSB);
+    send16bits(highRegister);
+    send16bits(Phase);
+   
+    delayMicroseconds(duration4); 
+    send16bits(sleepy);  
+    
+    digitalWrite(howland_pin,LOW); // H
+    digitalWrite(switch2_pin,HIGH);  // A
+  }else{
+    delayMicroseconds(delayStart4);
+    digitalWrite(switch1_pin,HIGH);
+    digitalWrite(howland_pin,HIGH); // H
+    digitalWrite(switch2_pin,LOW);  // A
+
+      send16bits(control_data_LSB);
+      send16bits(lowRegister);
+      send16bits(control_data_MSB);
+      send16bits(highRegister);
+      send16bits(Phase);
+  
+    delayMicroseconds(duration4);
+    send16bits(sleepy);     
+
+    digitalWrite(howland_pin,LOW); // H
+    digitalWrite(switch2_pin,HIGH);  // A
+  }
+
     pos_neg = 0;
   }
-//
-// else if(pos_neg == 2){
-//
-//
-////    delayMicroseconds(delay3trig);
-//    digitalWrite(howland_pin,HIGH); // H
-//    digitalWrite(switch2_pin,LOW);  // A
-//    
-//    digitalWrite(switch1_pin,HIGH); // B
-//  
-//    delayMicroseconds(delay3length);
-//    digitalWrite(howland_pin,LOW); // H
-//    digitalWrite(switch2_pin,HIGH);  // A
-//
-//    pos_neg = 3;
-//  }
-//
-// else if(pos_neg == 3){
-//
-//
-////    delayMicroseconds(delay4trig);
-//    digitalWrite(howland_pin,HIGH); // H
-//    digitalWrite(switch2_pin,LOW);  // A
-//    
-//    digitalWrite(switch1_pin,LOW); // B
-//  
-//    delayMicroseconds(delay4length);
-//    digitalWrite(howland_pin,LOW); // H
-//    digitalWrite(switch2_pin,HIGH);  // A
-//
-//    pos_neg = 0;
-//  }
-
   }
 }
 

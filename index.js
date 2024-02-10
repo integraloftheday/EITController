@@ -77,6 +77,16 @@ function captureFormData() {
     const delayStart2 = document.getElementById('delayStart2').value;
     const currentDuration2 = document.getElementById('currentDuration2').value;
 
+    // Get values from the second set of dropdown and text fields
+    const polarity3 = document.getElementById('polarity3').value;
+    const delayStart3 = document.getElementById('delayStart3').value;
+    const currentDuration3 = document.getElementById('currentDuration3').value;
+
+            // Get values from the second set of dropdown and text fields
+    const polarity4 = document.getElementById('polarity4').value;
+    const delayStart4 = document.getElementById('delayStart4').value;
+    const currentDuration4 = document.getElementById('currentDuration4').value;
+
     // Get value from the frequency textbox
     const frequency = document.getElementById('frequency').value;
 
@@ -92,6 +102,16 @@ function captureFormData() {
                 polarity: polarity2,
                 delayStart: delayStart2,
                 currentDuration: currentDuration2
+            },
+            {
+                polarity: polarity3,
+                delayStart: delayStart3,
+                currentDuration: currentDuration3
+            },
+            {
+                polarity: polarity4,
+                delayStart: delayStart4,
+                currentDuration: currentDuration4
             }
             // Add more sets as needed
         ],
@@ -120,13 +140,15 @@ function generateSine2(frequency, t,tstart,duration){
     }
 }
 
-function setCurrentDuration(value1,value2) {
+function setCurrentDuration(value1,value2,value3,value4) {
     // Set the value of the "Current Duration" textbox for the first set
     document.getElementById('currentDuration1').value = value1;
 
     // Set the value of the "Current Duration" textbox for the second set
     document.getElementById('currentDuration2').value = value2;
     // Add similar lines for more sets if needed
+    document.getElementById('currentDuration3').value = value3;
+    document.getElementById('currentDuration4').value = value4;
 }
 
 function roundToMultiple(number, multiple) {
@@ -139,7 +161,9 @@ function analyze(){
    var period = 1/formData.frequency; 
    var roundedDuration1 = roundToMultiple(formData.sets[0].currentDuration,period*0.5);
    var roundedDuration2 = roundToMultiple(formData.sets[1].currentDuration,period*0.5);
-    setCurrentDuration(roundedDuration1,roundedDuration2);
+   var roundedDuration3 = roundToMultiple(formData.sets[2].currentDuration,period*0.5);
+    var roundedDuration4 = roundToMultiple(formData.sets[3].currentDuration,period*0.5);
+    setCurrentDuration(roundedDuration1,roundedDuration2,roundedDuration3,roundedDuration4);
 }
 
 //serial communications 
@@ -221,7 +245,9 @@ function analyze() {
     var period = 1 / formData.frequency;
     var roundedDuration1 = roundToMultiple(formData.sets[0].currentDuration, period * 0.5);
     var roundedDuration2 = roundToMultiple(formData.sets[1].currentDuration, period * 0.5);
-    setCurrentDuration(roundedDuration1, roundedDuration2);
+    var roundedDuration3 = roundToMultiple(formData.sets[2].currentDuration, period * 0.5);
+    var roundedDuration4 = roundToMultiple(formData.sets[3].currentDuration, period * 0.5);
+    setCurrentDuration(roundedDuration1, roundedDuration2, roundedDuration3, roundedDuration4);
 
     // Continue with your existing analyze logic
 }
@@ -233,8 +259,10 @@ async function analyzeArduino(formData) {
     var period = 1 / formData.frequency;
     var roundedDuration1 = roundToMultiple(formData.sets[0].currentDuration, period * 0.5);
     var roundedDuration2 = roundToMultiple(formData.sets[1].currentDuration, period * 0.5);
-    setCurrentDuration(roundedDuration1, roundedDuration2);
-    var dataSend = `${formData.frequency}-${formData.sets[0].polarity == 'Positive'? 1:0}-${formData.sets[0].delayStart*1000}-${formData.sets[0].currentDuration*1000}-${formData.sets[1].polarity == 'Positive'? 1:0}-${formData.sets[1].delayStart*1000}-${formData.sets[1].currentDuration*1000}`;
+    var roundedDuration3 = roundToMultiple(formData.sets[2].currentDuration, period * 0.5);
+    var roundedDuration4 = roundToMultiple(formData.sets[3].currentDuration, period * 0.5);
+    setCurrentDuration(roundedDuration1, roundedDuration2, roundedDuration3, roundedDuration4);
+    var dataSend = `${formData.frequency}-${formData.sets[0].polarity == 'Positive'? 1:0}-${formData.sets[0].delayStart*1000}-${formData.sets[0].currentDuration*1000}-${formData.sets[1].polarity == 'Positive'? 1:0}-${formData.sets[1].delayStart*1000}-${formData.sets[1].currentDuration*1000}-${formData.sets[2].polarity == 'Positive'? 1:0}-${formData.sets[2].delayStart*1000}-${formData.sets[2].currentDuration*1000}-${formData.sets[3].polarity == 'Positive'? 1:0}-${formData.sets[3].delayStart*1000}-${formData.sets[3].currentDuration*1000}`;
     console.log(dataSend);
     try {
         // Ensure the connection is established before sending data
