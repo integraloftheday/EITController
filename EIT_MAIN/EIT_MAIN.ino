@@ -89,11 +89,17 @@ short pos_neg = 0;
 //}
 
 
+bool risingEdge = false;
+void IRAM_ATTR Ext_INT1_ISR(){
+  risingEdge = true;
+}
+
 
 void setup() {
 
 //Initiate console and switch
 pinMode(syncConsole_pin, INPUT); //input trigger from console to sync with pulse sequence
+attachInterrupt(syncConsole_pin, Ext_INT1_ISR, RISING);
 pinMode(test, INPUT);//
 
 pinMode(switch1_pin, OUTPUT); // B
@@ -169,17 +175,18 @@ void loop() {
   }
 
   // Correct layout of the calls
-  syncConsolePrev_value = syncConsoleCurrent_value;
-  syncConsoleCurrent_value = digitalRead(syncConsole_pin);
+  //syncConsolePrev_value = syncConsoleCurrent_value;
+  //syncConsoleCurrent_value = digitalRead(syncConsole_pin);
 
   
-  if((syncConsoleCurrent_value == HIGH) && (syncConsolePrev_value == LOW)){
+  if(risingEdge){ //(syncConsoleCurrent_value == HIGH) && (syncConsolePrev_value == LOW)){
     count++;
     int pos_neg_values[4] = {positive1, positive2, positive3, positive4};
     float delayStart_values[4] = {delayStart1, delayStart2, delayStart3, delayStart4};
     float duration_values[4] = {duration1, duration2, duration3, duration4};
     processSignal(pos_neg_values[pos_neg], delayStart_values[pos_neg], duration_values[pos_neg]);
     pos_neg = (pos_neg + 1) % 4;
+    risingEdge = false;
     //Serial.println(pos_neg);
   }
 }
