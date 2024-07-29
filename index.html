@@ -56,6 +56,20 @@
                 <label for="frequency">Frequency (Hz)</label>
                 <input type="text" class="form-control" id="frequency" placeholder="Enter frequency ">
             </div>
+            <label for="waitUntil">Wait Until Enable / Disable (High Freq Disable)</label>
+            <select id="waitUntil" class="form-control">
+                <option selected>Choose...</option>
+                <option>Enabled</option>
+                <option>Disabled</option>
+            </select>
+
+            <label for="zeroThreshold">Zero Threshold: Smaller more likely to alias at higher frequencies </label>
+            <div class="form-group col-md-4">
+                <input type="text" class="form-control" id="zeroThreshold"  value="500">
+            </div>
+            
+
+            
 
             <!-- First Dropdown Menu and Text Fields -->
             <div class="form-row">

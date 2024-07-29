@@ -89,6 +89,8 @@ function captureFormData() {
 
     // Get value from the frequency textbox
     const frequency = document.getElementById('frequency').value;
+    const waitUnitl = document.getElementById('waitUntil').value;
+    const zeroThreshold = document.getElementById('zeroThreshold').value;
 
     // Create a JSON object with the captured data
     const formData = {
@@ -115,7 +117,9 @@ function captureFormData() {
             }
             // Add more sets as needed
         ],
-        frequency: frequency
+        frequency: frequency,
+        waitUnitl: waitUnitl,
+        zeroThreshold: zeroThreshold
     };
 
     return formData;
@@ -262,7 +266,7 @@ async function analyzeArduino(formData) {
     var roundedDuration3 = roundToMultiple(formData.sets[2].currentDuration, period * 0.5);
     var roundedDuration4 = roundToMultiple(formData.sets[3].currentDuration, period * 0.5);
     setCurrentDuration(roundedDuration1, roundedDuration2, roundedDuration3, roundedDuration4);
-    var dataSend = `${formData.frequency}-${formData.sets[0].polarity == 'Positive'? 1:0}-${formData.sets[0].delayStart*1000}-${formData.sets[0].currentDuration*1000}-${formData.sets[1].polarity == 'Positive'? 1:0}-${formData.sets[1].delayStart*1000}-${formData.sets[1].currentDuration*1000}-${formData.sets[2].polarity == 'Positive'? 1:0}-${formData.sets[2].delayStart*1000}-${formData.sets[2].currentDuration*1000}-${formData.sets[3].polarity == 'Positive'? 1:0}-${formData.sets[3].delayStart*1000}-${formData.sets[3].currentDuration*1000}`;
+    var dataSend = `${formData.waitUnitl == 'Enabled'? 1:0}-${formData.zeroThreshold}-${formData.frequency}-${formData.sets[0].polarity == 'Positive'? 1:0}-${formData.sets[0].delayStart*1000}-${formData.sets[0].currentDuration*1000}-${formData.sets[1].polarity == 'Positive'? 1:0}-${formData.sets[1].delayStart*1000}-${formData.sets[1].currentDuration*1000}-${formData.sets[2].polarity == 'Positive'? 1:0}-${formData.sets[2].delayStart*1000}-${formData.sets[2].currentDuration*1000}-${formData.sets[3].polarity == 'Positive'? 1:0}-${formData.sets[3].delayStart*1000}-${formData.sets[3].currentDuration*1000}`;
     console.log(dataSend);
     try {
         // Ensure the connection is established before sending data

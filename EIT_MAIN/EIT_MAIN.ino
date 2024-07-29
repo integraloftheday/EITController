@@ -1,8 +1,8 @@
 
 #include <SPI.h>
-//#include <esp_now.h>
-//#include <WiFi.h>
-
+#include <driver/adc.h>
+#include <esp_adc_cal.h>
+#include <esp_err.h>
 /*
  * Hold the AD9833 in RESET state.
  * Resets internal registers to 0, which corresponds to an output of
@@ -49,6 +49,10 @@ short switch1_pin     = 16; // B
 short switch2_pin     = 21; // A
 short howland_pin     = 17; // H
 short test            = 32;
+short sine_pin        = 27;
+
+//Wait until Parameters 
+bool waitUntilFlag = true;
 
 short syncConsole_pin = 26;
 
@@ -95,8 +99,15 @@ void IRAM_ATTR Ext_INT1_ISR(){
 }
 
 
-void setup() {
+#define ADC_CHANNEL ADC2_CHANNEL_7  // ADC2 channel 0 (GPIO 4)
+#define ADC_WIDTH ADC_WIDTH_BIT_12
 
+int ZERO_THRESHOLD = 500;
+
+void setup() {
+//ADC set up 
+    adc2_config_channel_atten(ADC_CHANNEL,  ADC_ATTEN_DB_6);  // Configure attenuation for ADC2 channel 0
+    //adc2_set_width(ADC_WIDTH);  // Set ADC2 width to 12 bits
 //Initiate console and switch
 pinMode(syncConsole_pin, INPUT); //input trigger from console to sync with pulse sequence
 attachInterrupt(syncConsole_pin, Ext_INT1_ISR, RISING);
@@ -149,25 +160,51 @@ bool positive4;
 float delayStart4;
 float duration4;
 
+int current_sample = 0;
+  
 void loop() {
+
+  /*esp_err_t r = adc2_get_raw(ADC_CHANNEL, ADC_WIDTH, &current_sample);
+  if (r != ESP_OK) {
+    Serial.println("ADC read error");
+  }else{
+      Serial.println(current_sample);
+  }*/
+
   // Serial communication
   if (Serial.available() > 0) {
     // Read and parse the serial message
     String serialMessage = Serial.readStringUntil('\n');
-    int parsedItems = sscanf(serialMessage.c_str(), "%d-%d-%f-%f-%d-%f-%f-%d-%f-%f-%d-%f-%f", 
-                             &frequency, &positive1, &delayStart1, &duration1,
+    int parsedItems = sscanf(serialMessage.c_str(), "%d-%d-%d-%d-%f-%f-%d-%f-%f-%d-%f-%f-%d-%f-%f", 
+                             &waitUntilFlag,&ZERO_THRESHOLD, &frequency, &positive1, &delayStart1, &duration1,
                              &positive2, &delayStart2, &duration2,&positive3, &delayStart3, &duration3,
                              &positive4, &delayStart4, &duration4);
 
     // Check if all values were parsed successfully
-    if (parsedItems == 13) {
+    if (parsedItems == 15) {
       convertFrequencyToRegisters(static_cast<uint16_t>(frequency), highRegister, lowRegister);
       Serial.println("Successful Programming");
+      Serial.println("WaitUntil");
+      Serial.print(waitUntilFlag);
+      Serial.println("");
+            Serial.println("Zero Threshold");
+      Serial.print(ZERO_THRESHOLD);
+      Serial.println("");
       printValues("Frequency", frequency, highRegister, lowRegister);
       printValues("Positive1", positive1, delayStart1, duration1);
       printValues("Positive2", positive2, delayStart2, duration2);
       printValues("Positive3", positive3, delayStart3, duration3);
       printValues("Positive4", positive4, delayStart4, duration4);
+
+      //start Freq Generator 
+
+        send16bits(control_data_LSB);
+        send16bits(lowRegister);
+        send16bits(control_data_MSB);
+        send16bits(highRegister);
+        send16bits(Phase);
+        //send16bits(square);
+  
     } else {
       // Handle parsing error
       Serial.println("Error parsing serial message");
@@ -204,19 +241,14 @@ void printValues(const char* name, int value, int high, int low) {
 
 void processSignal(int positive, float delayStart, float duration) {
   delayMicroseconds(delayStart);
+  if(waitUntilFlag){
+    waitUntil();
+  }
   digitalWrite(switch1_pin, positive ? HIGH : LOW);
   digitalWrite(howland_pin, HIGH);
   digitalWrite(switch2_pin, LOW);
 
-  send16bits(control_data_LSB);
-  send16bits(lowRegister);
-  send16bits(control_data_MSB);
-  send16bits(highRegister);
-  send16bits(Phase);
-  //send16bits(square);
-
   delayMicroseconds(duration);
-  send16bits(sleepy);
 
   digitalWrite(howland_pin, LOW);
   digitalWrite(switch2_pin, HIGH);
@@ -230,7 +262,19 @@ void send16bits(short mydata){
     SPI.endTransaction();
 }
 
-
+int waitUntil(){
+  while(true){
+    // Optionally, include a small delay to prevent excessive CPU usage
+      esp_err_t r = adc2_get_raw(ADC_CHANNEL, ADC_WIDTH, &current_sample);
+    if (r != ESP_OK) {
+    Serial.println("ADC read error");
+    }else{
+      if(current_sample<ZERO_THRESHOLD){
+        return 0 ; 
+      }
+    }
+  }
+}
 void convertFrequencyToRegisters(uint32_t frequency, uint16_t &highRegister, uint16_t &lowRegister) {
   // Calculate the 28-bit frequency register value for the AD9833
   uint32_t frequencyRegisterValue = (frequency * (1LL << 28)) / referenceFrequency;
